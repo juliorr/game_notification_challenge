@@ -90,7 +90,7 @@ Source: [`docs/event-flow.mmd`](docs/event-flow.mmd) (Mermaid). Regenerate with:
 ```sh
 docker run --rm -u "$(id -u):$(id -g)" -v "$PWD/docs":/data \
   minlag/mermaid-cli -i /data/event-flow.mmd -o /data/event-flow.png \
-  -w 1600 -H 1200 -b transparent
+  -w 1600 -H 1200 -b white
 ```
 
 If a message exceeds `x-delivery-limit` (5) attempts it is routed to the `notifications.events.dlx` DLX and ends up in the `notifications.dispatch.dlq` queue (purgeable with `make rabbit-purge`).
