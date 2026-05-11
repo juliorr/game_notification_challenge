@@ -1,0 +1,262 @@
+title: |md
+  # Notification System — Architecture
+  ##### Real-time gaming notifications · Spring Boot · RabbitMQ · PostgreSQL · STOMP/WebSocket
+| {
+  near: top-center
+}
+
+direction: down
+
+classes: {
+  box: {
+    shape: rectangle
+    style: {
+      fill: "#ffffff"
+      stroke: "#c7d2fe"
+      stroke-width: 1
+      font-color: "#312e81"
+      border-radius: 5
+    }
+  }
+  highlight: {
+    shape: rectangle
+    style: {
+      fill: "#c7d2fe"
+      stroke: "#4f46e5"
+      stroke-width: 2
+      font-color: "#312e81"
+      border-radius: 5
+      bold: true
+      shadow: true
+    }
+  }
+  tech: {
+    shape: rectangle
+    style: {
+      fill: "#eef2ff"
+      stroke: "#c7d2fe"
+      stroke-width: 1
+      font-color: "#4338ca"
+      border-radius: 5
+    }
+  }
+  layer_user: {
+    style: {
+      fill: "#dbeafe"
+      stroke: "#3b82f6"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#1e40af"
+      bold: true
+    }
+  }
+  layer_app: {
+    style: {
+      fill: "#e0e7ff"
+      stroke: "#4f46e5"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#3730a3"
+      bold: true
+    }
+  }
+  layer_channels: {
+    style: {
+      fill: "#ede9fe"
+      stroke: "#7c3aed"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#5b21b6"
+      bold: true
+    }
+  }
+  layer_data: {
+    style: {
+      fill: "#f3e8ff"
+      stroke: "#9333ea"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#7e22ce"
+      bold: true
+    }
+  }
+  layer_infra: {
+    style: {
+      fill: "#fae8ff"
+      stroke: "#a855f7"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#86198f"
+      bold: true
+    }
+  }
+  layer_external: {
+    style: {
+      fill: "#f1f5f9"
+      stroke: "#94a3b8"
+      stroke-width: 2
+      stroke-dash: 4
+      border-radius: 6
+      font-color: "#475569"
+      bold: true
+    }
+  }
+  panel: {
+    style: {
+      fill: "#eef2ff"
+      stroke: "#a5b4fc"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#312e81"
+      bold: true
+    }
+  }
+  panel_item: {
+    shape: rectangle
+    style: {
+      fill: "#ffffff"
+      stroke: "#c7d2fe"
+      stroke-width: 1
+      font-color: "#3730a3"
+      border-radius: 4
+    }
+  }
+  panel_metric: {
+    shape: rectangle
+    style: {
+      fill: "#e0e7ff"
+      stroke: "#6366f1"
+      stroke-width: 1
+      font-color: "#3730a3"
+      border-radius: 4
+      bold: true
+    }
+  }
+}
+
+client: "Client Layer · Browser" {
+  class: layer_user
+  direction: right
+
+  react: "React 18 + TS\nVite · React Router" { class: box; icon: ./icons/react.svg }
+  stomp: "STOMP.js Client\nWebSocket subscriber" { class: highlight }
+  ui: "Notifications UI\nList · badge · prefs" { class: box }
+  tabs: "Mailbox / Push tabs\nMock channel views" { class: box }
+}
+
+app: "Application Layer · Spring Boot Backend (Java 21)" {
+  class: layer_app
+  direction: right
+
+  rest: "REST Controllers\n/api/** · Spring MVC" { class: box; icon: ./icons/spring.svg }
+  broker: "STOMP Broker\n/ws → /topic/notifications/{userId}" { class: highlight; icon: ./icons/spring.svg }
+  sim: "SimulatorController\nGameEngine · SocialSystem" { class: box; icon: ./icons/spring.svg }
+  pref: "UserPreferenceService\nper-user channel toggles" { class: box; icon: ./icons/spring.svg }
+  pub: "RabbitDomainEventPublisher\nSpring AMQP · topic exchange" { class: highlight; icon: ./icons/spring.svg }
+  lis: "NotificationEventListener\n@RabbitListener · 3 queues" { class: highlight; icon: ./icons/spring.svg }
+  disp: "NotificationDispatcher\nFactory · Store · Channels" { class: highlight; icon: ./icons/spring.svg }
+}
+
+channels: "Delivery Channels" {
+  class: layer_channels
+  direction: right
+
+  ws: "InAppWebSocketChannel\nSTOMP push to browser" { class: box; icon: ./icons/spring.svg }
+  rsc: "ReadStatusChannel\nread/cleared state sync" { class: box; icon: ./icons/spring.svg }
+  emc: "EmailMockChannel\nBoundedInMemoryStore" { class: box; icon: ./icons/spring.svg }
+  pmc: "PushMockChannel\nBoundedInMemoryStore" { class: box; icon: ./icons/spring.svg }
+}
+
+data: "Messaging & Persistence" {
+  class: layer_data
+  direction: right
+
+  ex: "Exchange\nnotifications.events (topic)" { class: tech; icon: ./icons/rabbitmq.svg }
+  qs: "Queues\ndispatch.{game,social,user}.q" { class: tech; icon: ./icons/rabbitmq.svg }
+  dlq: "DLX + DLQ\nx-delivery-limit = 5" { class: tech; icon: ./icons/rabbitmq.svg }
+  quorum: "Quorum Queues\nRabbitMQ 3.13" { class: tech; icon: ./icons/rabbitmq.svg }
+  jpa: "JpaNotificationStore\nSpring Data JPA · Hibernate" { class: tech; icon: ./icons/spring.svg }
+  pg: "PostgreSQL 16\ncursor pagination · MAX 100" { class: tech; icon: ./icons/postgresql.svg }
+  mem: "InMemoryNotificationStore\nfast tests only" { class: tech }
+}
+
+infra: "Infrastructure · docker-compose" {
+  class: layer_infra
+  direction: right
+
+  fe: "notif-frontend\nnginx :5173 → :80" { class: tech }
+  be: "notif-backend\nSpring Boot :8080" { class: tech; icon: ./icons/spring.svg }
+  mq: "notif-rabbitmq\n:5672 / :15672" { class: tech; icon: ./icons/rabbitmq.svg }
+  db: "notif-postgres\n:5432 · pgdata volume" { class: tech; icon: ./icons/postgresql.svg }
+  hc: "Healthchecks\nactuator · pg_isready" { class: tech }
+}
+
+external: "External / Mocked Integrations" {
+  class: layer_external
+  direction: right
+
+  smtp: "SMTP (mocked)\nEmailMockChannel" { class: tech }
+  apns: "APNs / FCM (mocked)\nPushMockChannel" { class: tech }
+  mockrest: "REST mock endpoints\n/api/mock-emails · /api/mock-push" { class: tech }
+}
+
+extras_top: "Build & Tooling   ·   Tests" {
+  class: panel
+  direction: right
+
+  tooling: "Build & Tooling" {
+    class: panel
+    direction: right
+    m: "Makefile targets" { class: panel_item }
+    mvn: "Maven 3.9 (container)" { class: panel_item }
+    node: "Node 22 (container)" { class: panel_item }
+    fmt: "google-java-format" { class: panel_item }
+    lint: "ESLint + Prettier" { class: panel_item }
+  }
+
+  tests: "Tests" {
+    class: panel
+    direction: right
+    junit: "JUnit 5" { class: panel_item }
+    tc: "Testcontainers" { class: panel_item }
+    pgmq: "Postgres + RabbitMQ" { class: panel_item }
+    dind: "dind runner" { class: panel_item }
+  }
+}
+
+extras_top -> client: "" { style.opacity: 0 }
+client -> app: "" { style.opacity: 0 }
+app -> channels: "" { style.opacity: 0 }
+channels -> data: "" { style.opacity: 0 }
+data -> infra: "" { style.opacity: 0 }
+infra -> external: "" { style.opacity: 0 }
+external -> extras_bottom: "" { style.opacity: 0 }
+
+extras_bottom: "Domain Events   ·   Reliability" {
+  class: panel
+  direction: right
+
+  events: "Domain Events" {
+    class: panel
+    direction: right
+    e1: "game.player.leveled-up" { class: panel_item }
+    e2: "game.player.defeated-pvp" { class: panel_item }
+    e3: "game.item.acquired" { class: panel_item }
+    e4: "game.challenge.completed" { class: panel_item }
+    e5: "social.friend.request-sent" { class: panel_item }
+    e6: "social.friend.request-accepted" { class: panel_item }
+    e7: "social.follower.new" { class: panel_item }
+    e8: "user.notification.read" { class: panel_item }
+    e9: "user.notifications.all-read" { class: panel_item }
+    e10: "user.notifications.cleared" { class: panel_item }
+  }
+
+  reliability: "Reliability" {
+    class: panel
+    direction: right
+    r1: "DLX retry limit: 5" { class: panel_metric }
+    r2: "Quorum queues" { class: panel_metric }
+    r3: "Cursor paging" { class: panel_item }
+    r4: "Page size: 100 max" { class: panel_item }
+  }
+}

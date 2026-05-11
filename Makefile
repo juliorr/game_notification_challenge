@@ -120,6 +120,14 @@ docs-diagram: ## Regenerate docs/event-flow.png from docs/event-flow.d2
 		--layout=elk --theme=0 --pad=40 \
 		event-flow.d2 event-flow.png
 
+docs-arch: ## Regenerate docs/system-architecture.png from docs/system-architecture.d2
+	docker run --rm -u "$(shell id -u):$(shell id -g)" \
+		-v "$(ROOT)/docs":/work -w /work \
+		terrastruct/d2:latest \
+		--layout=elk --theme=0 --pad=40 \
+		system-architecture.d2 system-architecture.png
+
 .PHONY: help build build-backend build-frontend test test-backend fmt fmt-check \
 	frontend-install frontend-typecheck frontend-lint up down logs ps demo mvn npm clean \
-	rabbit-ui logs-rabbit rabbit-cli rabbit-purge db-shell logs-postgres docs-diagram
+	rabbit-ui logs-rabbit rabbit-cli rabbit-purge db-shell logs-postgres \
+	docs-diagram docs-arch
