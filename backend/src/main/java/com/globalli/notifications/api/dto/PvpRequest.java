@@ -1,0 +1,5 @@
+package com.globalli.notifications.api.dto;
+
+import jakarta.validation.constraints.Positive;
+
+public record PvpRequest(@Positive long userId, @Positive long attackerUserId) {}

@@ -1,0 +1,85 @@
+flowchart TD
+    SC["SimulatorController"]
+    GE["GameEngine / SocialSystem"]
+    API["NotificationsController<br/>(read / read-all / clear)"]
+    PUB["RabbitDomainEventPublisher<br/>publish(GameEvent | SocialEvent | UserActionEvent)"]
+    EX{{"Exchange<br/>notifications.events (topic)"}}
+    QG[("notifications.dispatch.game.q<br/>game.#")]
+    QS[("notifications.dispatch.social.q<br/>social.#")]
+    QU[("notifications.dispatch.user.q<br/>user.#")]
+    LIS["NotificationEventListener<br/>@RabbitListener × 3"]
+    DISP["NotificationDispatcher"]
+    UAH["UserActionHandler"]
+    FAC["NotificationFactory"]
+    PREF["UserPreferenceService"]
+    STORE[("NotificationStore<br/>JpaNotificationStore")]
+    WS["InAppWebSocketChannel"]
+    EMC["EmailMockChannel"]
+    PMC["PushMockChannel"]
+    RSC["ReadStatusChannel"]
+    EMSTORE[("MockEmailStore")]
+    PMSTORE[("BoundedInMemoryStore<br/>MockPushNotification")]
+    T1(["/topic/notifications/{userId}"])
+    T2(["/topic/notifications/{userId}/read"])
+    T3(["/topic/notifications/{userId}/read-all"])
+    T4(["/topic/notifications/{userId}/cleared"])
+    DLX{{"notifications.events.dlx (DLX)"}}
+    DLQ[("notifications.dispatch.dlq")]
+    CLIENT(["Browser (STOMP client)"])
+
+    SC --> GE
+    GE --> PUB
+    API --> PUB
+    PUB --> EX
+    EX --> QG
+    EX --> QS
+    EX --> QU
+
+    QG --> LIS
+    QS --> LIS
+    QU --> LIS
+
+    LIS -- "game.# / social.#" --> DISP
+    LIS -- "user.#" --> UAH
+
+    DISP --> FAC
+    DISP --> PREF
+    DISP --> STORE
+    DISP --> WS
+    DISP --> EMC
+    DISP --> PMC
+
+    EMC --> EMSTORE
+    PMC --> PMSTORE
+
+    UAH --> STORE
+    UAH --> RSC
+
+    WS --> T1
+    RSC --> T2
+    RSC --> T3
+    RSC --> T4
+
+    T1 --> CLIENT
+    T2 --> CLIENT
+    T3 --> CLIENT
+    T4 --> CLIENT
+
+    QG -. "delivery-limit = 5" .-> DLX
+    QS -. "delivery-limit = 5" .-> DLX
+    QU -. "delivery-limit = 5" .-> DLX
+    DLX --> DLQ
+
+    classDef svc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef infra fill:#fff3e0,stroke:#ef6c00,color:#e65100;
+    classDef store fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c;
+    classDef topic fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    classDef client fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef fail fill:#ffebee,stroke:#c62828,color:#b71c1c;
+
+    class SC,GE,API,PUB,LIS,DISP,UAH,FAC,PREF,WS,EMC,PMC,RSC svc;
+    class EX,QG,QS,QU infra;
+    class STORE,EMSTORE,PMSTORE store;
+    class T1,T2,T3,T4 topic;
+    class CLIENT client;
+    class DLX,DLQ fail;

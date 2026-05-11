@@ -1,0 +1,15 @@
+package com.globalli.notifications;
+
+import com.globalli.notifications.config.NotificationsProperties;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+@SpringBootApplication
+@EnableConfigurationProperties(NotificationsProperties.class)
+public class NotificationApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(NotificationApplication.class, args);
+  }
+}

@@ -1,0 +1,14 @@
+notifications:
+  cors:
+    allowed-origins: ${NOTIFICATIONS_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+spring:
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/notifications}
+    username: ${SPRING_DATASOURCE_USERNAME:notif}
+    password: ${SPRING_DATASOURCE_PASSWORD:notif}
