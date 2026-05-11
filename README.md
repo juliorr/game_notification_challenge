@@ -85,12 +85,10 @@ The email and push channels are mocks: no SMTP and no APNs/FCM are involved. Gen
 
 ![Domain event flow](docs/event-flow.png)
 
-Source: [`docs/event-flow.mmd`](docs/event-flow.mmd) (Mermaid). Regenerate with:
+Source: [`docs/event-flow.d2`](docs/event-flow.d2) ([D2](https://d2lang.com), rendered with the ELK layout engine). Regenerate with:
 
 ```sh
-docker run --rm -u "$(id -u):$(id -g)" -v "$PWD/docs":/data \
-  minlag/mermaid-cli -i /data/event-flow.mmd -o /data/event-flow.png \
-  -w 1600 -H 1200 -b white
+make docs-diagram
 ```
 
 If a message exceeds `x-delivery-limit` (5) attempts it is routed to the `notifications.events.dlx` DLX and ends up in the `notifications.dispatch.dlq` queue (purgeable with `make rabbit-purge`).

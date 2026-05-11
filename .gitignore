@@ -11,3 +11,4 @@ dist/
 *.iml
 .env
 .env.local
+CLAUDE.md

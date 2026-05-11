@@ -113,6 +113,13 @@ db-shell: ## Open psql against the postgres container
 logs-postgres: ## Tail postgres logs
 	docker compose logs -f postgres
 
+docs-diagram: ## Regenerate docs/event-flow.png from docs/event-flow.d2
+	docker run --rm -u "$(shell id -u):$(shell id -g)" \
+		-v "$(ROOT)/docs":/work -w /work \
+		terrastruct/d2:latest \
+		--layout=elk --theme=0 --pad=40 \
+		event-flow.d2 event-flow.png
+
 .PHONY: help build build-backend build-frontend test test-backend fmt fmt-check \
 	frontend-install frontend-typecheck frontend-lint up down logs ps demo mvn npm clean \
-	rabbit-ui logs-rabbit rabbit-cli rabbit-purge db-shell logs-postgres
+	rabbit-ui logs-rabbit rabbit-cli rabbit-purge db-shell logs-postgres docs-diagram

@@ -1,0 +1,146 @@
+title: |md
+  # Domain event flow — notification system
+| {
+  near: top-center
+}
+
+direction: down
+
+classes: {
+  svc: {
+    shape: rectangle
+    style: {
+      fill: "#eaf2fb"
+      stroke: "#1565c0"
+      stroke-width: 2
+      font-color: "#0d47a1"
+      border-radius: 6
+      shadow: true
+    }
+  }
+  store: {
+    shape: cylinder
+    style: {
+      fill: "#f4ecf7"
+      stroke: "#6c3483"
+      stroke-width: 2
+      font-color: "#4a235a"
+    }
+  }
+  topic: {
+    shape: page
+    style: {
+      fill: "#eafaf1"
+      stroke: "#1e8449"
+      stroke-width: 2
+      font-color: "#145a32"
+    }
+  }
+  rabbit: {
+    shape: image
+    icon: ./icons/rabbitmq.svg
+  }
+  rabbit_fail: {
+    shape: image
+    icon: ./icons/rabbitmq.svg
+    style: {
+      stroke: "#c62828"
+      stroke-width: 3
+    }
+  }
+  postgres: {
+    shape: image
+    icon: ./icons/postgresql.svg
+  }
+  react: {
+    shape: image
+    icon: ./icons/react.svg
+  }
+}
+
+sim: "SimulatorController" { class: svc; icon: ./icons/spring.svg }
+game: "GameEngine / SocialSystem" { class: svc; icon: ./icons/spring.svg }
+api: "NotificationsController\n(read · read-all · clear)" { class: svc; icon: ./icons/spring.svg }
+pub: "RabbitDomainEventPublisher\npublish(GameEvent | SocialEvent | UserActionEvent)" { class: svc; icon: ./icons/spring.svg }
+
+ex: "notifications.events\n(topic exchange)" { class: rabbit }
+qg: "notifications.dispatch.game.q" { class: rabbit }
+qs: "notifications.dispatch.social.q" { class: rabbit }
+qu: "notifications.dispatch.user.q" { class: rabbit }
+dlx: "notifications.events.dlx (DLX)" { class: rabbit_fail }
+dlq: "notifications.dispatch.dlq" { class: rabbit_fail }
+
+lis: "NotificationEventListener\n@RabbitListener × 3" { class: svc; icon: ./icons/spring.svg }
+disp: "NotificationDispatcher" { class: svc; icon: ./icons/spring.svg }
+uah: "UserActionHandler" { class: svc; icon: ./icons/spring.svg }
+fac: "NotificationFactory" { class: svc; icon: ./icons/spring.svg }
+pref: "UserPreferenceService" { class: svc; icon: ./icons/spring.svg }
+
+ws: "InAppWebSocketChannel" { class: svc; icon: ./icons/spring.svg }
+emc: "EmailMockChannel" { class: svc; icon: ./icons/spring.svg }
+pmc: "PushMockChannel" { class: svc; icon: ./icons/spring.svg }
+rsc: "ReadStatusChannel" { class: svc; icon: ./icons/spring.svg }
+
+store: "NotificationStore\n(JpaNotificationStore)" { class: postgres }
+emstore: "MockEmailStore" { class: store }
+pmstore: "BoundedInMemoryStore<MockPushNotification>" { class: store }
+
+t1: "/topic/notifications/{userId}" { class: topic }
+t2: "/topic/notifications/{userId}/read" { class: topic }
+t3: "/topic/notifications/{userId}/read-all" { class: topic }
+t4: "/topic/notifications/{userId}/cleared" { class: topic }
+
+browser: "Browser\n(STOMP client)" { class: react }
+
+sim -> game
+game -> pub
+api -> pub
+pub -> ex
+
+ex -> qg: "game.#"
+ex -> qs: "social.#"
+ex -> qu: "user.#"
+
+qg -> lis
+qs -> lis
+qu -> lis
+
+qg -> dlx: "delivery-limit = 5" {
+  style.stroke: "#c62828"
+  style.stroke-dash: 4
+}
+qs -> dlx {
+  style.stroke: "#c62828"
+  style.stroke-dash: 4
+}
+qu -> dlx {
+  style.stroke: "#c62828"
+  style.stroke-dash: 4
+}
+dlx -> dlq {
+  style.stroke: "#c62828"
+}
+
+lis -> disp: "game.# / social.#"
+lis -> uah: "user.#"
+disp -> fac
+disp -> pref
+disp -> store
+disp -> ws
+disp -> emc
+disp -> pmc
+uah -> store
+uah -> rsc
+
+emc -> emstore
+pmc -> pmstore
+
+ws -> t1
+rsc -> t2
+rsc -> t3
+rsc -> t4
+
+t1 -> browser
+t2 -> browser
+t3 -> browser
+t4 -> browser
